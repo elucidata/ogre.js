@@ -9,7 +9,8 @@
     "build": "coffee -o ./ -c src/ogre.coffee",
     "build-test": "coffee -b -c -j test/all-tests.js test/src/test-helpers.coffee test/src/test-api.coffee test/src/test-flows.coffee test/src/misc-test.coffee",
     "min": "uglifyjs ogre.js -o ogre.min.js -c -m --preamble \"/* ogre.js - MIT Licensed - http://github.com/elucidata/ogre.js */\"",
-    "dist": "npm run test && npm run min"
+    "dist": "npm run test && npm run min",
+    "verbump": ""
   },
   "author": "Matt McCray <matt@elucidata.net>",
   "license": "MIT",
@@ -20,6 +21,7 @@
     "mocha": "~1.17.1",
     "coffee-script": "~1.7.1",
     "uglify-js": "~2.4.8",
-    "chai": "~1.9.0"
+    "chai": "~1.9.0",
+    "mversion": "~0.3.1"
   }
 }
