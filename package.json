@@ -1,6 +1,6 @@
 {
   "name": "ogre-js",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Object graph manager, built with ReactJS in mind.",
   "main": "ogre.js",
   "scripts": {
