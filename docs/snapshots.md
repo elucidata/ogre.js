@@ -1,6 +1,6 @@
 # Snapshots / Undo
 
-A simple way to facilitate undo in your app is to add an onChange listener to the cursor (or dataset) you'd like to make undoable and keep a list of snapshots. Since Dataset will return a clone of the data when calling `.get()` you're assured that the snapshots won't be mutated.
+A simple way to facilitate undo in your app is to add an onChange listener to the cursor (or dataset) you'd like to make undoable and keep a list of snapshots. Since ogre will return a clone of the data when calling `.get()` you're assured that the snapshots won't be mutated.
 
 A naive implementation might look something like this:
 
