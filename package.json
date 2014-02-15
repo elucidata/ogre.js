@@ -1,0 +1,25 @@
+{
+  "name": "ogre-js",
+  "version": "0.1.0",
+  "description": "Object graph manager, built with ReactJS in mind.",
+  "main": "ogre.js",
+  "scripts": {
+    "preblish": "npm run dist",
+    "test": "npm run build && npm run build-test && mocha",
+    "build": "coffee -o ./ -c src/ogre.coffee",
+    "build-test": "coffee -b -c -j test/all-tests.js test/src/test-helpers.coffee test/src/test-api.coffee test/src/test-flows.coffee test/src/misc-test.coffee",
+    "min": "uglifyjs ogre.js -o ogre.min.js -c -m --preamble \"/* ogre.js - MIT Licensed - http://github.com/elucidata/ogre.js */\"",
+    "dist": "npm run test && npm run min"
+  },
+  "author": "Matt McCray <matt@elucidata.net>",
+  "license": "MIT",
+  "dependencies": {
+    "underscore": "~1.6.0"
+  },
+  "devDependencies": {
+    "mocha": "~1.17.1",
+    "coffee-script": "~1.7.1",
+    "uglify-js": "~2.4.8",
+    "chai": "~1.9.0"
+  }
+}

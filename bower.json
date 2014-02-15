@@ -1,0 +1,29 @@
+{
+  "name": "ogre",
+  "main": "ogre.js",
+  "version": "0.1.0",
+  "authors": [
+    "Matt McCray <matt@elucidata.net>"
+  ],
+  "homepage": "https://github.com/elucidata/ogre.js",
+  "description": "Object graph manager, built with ReactJS in mind.",
+  "license": "MIT",
+  "keywords": [
+    "react",
+    "data",
+    "local",
+    "simple",
+    "change",
+    "callbacks"
+  ],
+  "dependencies": {
+    "underscore": "*"
+  },
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
