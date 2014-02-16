@@ -10,10 +10,21 @@
     "build-test": "coffee -b -c -j test/all-tests.js test/src/test-helpers.coffee test/src/test-api.coffee test/src/test-flows.coffee test/src/misc-test.coffee",
     "min": "uglifyjs ogre.js -o ogre.min.js -c -m --preamble \"/* ogre.js - MIT Licensed - http://github.com/elucidata/ogre.js */\"",
     "dist": "npm run test && npm run min",
-    "verbump": ""
+    "inc-major": "mversion major",
+    "inc-minor": "mversion minor",
+    "inc-patch": "mversion patch",
+    "version": "mversion"
   },
   "author": "Matt McCray <matt@elucidata.net>",
   "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/elucidata/ogre.js/issues"
+  },
+  "homepage": "https://github.com/elucidata/ogre.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/elucidata/ogre.js.git"
+  },
   "dependencies": {
     "underscore": "~1.6.0"
   },
