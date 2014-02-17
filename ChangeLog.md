@@ -1,4 +1,6 @@
 # HEAD
+
+# v0.1.2
 - Reorganized files, moved dist files under dist/ folder.
 - Removed dependency on underscore
 - UMD support (should work under node, browser, requirejs, and amd).
