@@ -2395,7 +2395,7 @@ Meaning, you can create cursors for unpopulated paths and set onChange
 handlers for them, then when/if data is ever set for that path you'll get 
 the callback.
  */
-var DEBUG, SETTABLE_VALUES, changeEvent, getKeyParts, getKeyPath, ogre, setKeyPath, startsWith, type, warnOnce, _,
+var DEBUG, SETTABLE_VALUES, changeEvent, ogre, _,
   __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 _ = _dereq_('./tools');
@@ -2405,8 +2405,6 @@ DEBUG = "production" === 'development' ? true : false;
 SETTABLE_VALUES = 'object array null undefined'.split(' ');
 
 changeEvent = _dereq_('./change-event');
-
-startsWith = _.startsWith, warnOnce = _.warnOnce, getKeyParts = _.getKeyParts, getKeyPath = _.getKeyPath, setKeyPath = _.setKeyPath, type = _.type;
 
 ogre = function(source, lockEditsToRoot) {
   var cursor, _callbacks, _changeGraph, _fullpath, _lastChangePath, _triggerCallbacks;
@@ -2422,7 +2420,7 @@ ogre = function(source, lockEditsToRoot) {
     var cb, _i, _len;
     for (_i = 0, _len = _callbacks.length; _i < _len; _i++) {
       cb = _callbacks[_i];
-      if (startsWith(e.path, cb != null ? cb.basepath : void 0)) {
+      if (_.startsWith(e.path, cb != null ? cb.basepath : void 0)) {
         cb.exec(e);
       }
     }
@@ -2430,14 +2428,14 @@ ogre = function(source, lockEditsToRoot) {
   };
   _changeGraph = function(fullpath, data, replace, silent) {
     var e;
-    if (e = setKeyPath(source, fullpath, data, replace)) {
+    if (e = _.setKeyPath(source, fullpath, data, replace)) {
       if (silent) {
         return;
       }
       _lastChangePath = e.path;
       _triggerCallbacks(e);
       _lastChangePath = null;
-      return warnOnce.clear();
+      return _.warnOnce.clear();
     }
   };
   cursor = function(rootpath, readonly) {
@@ -2448,12 +2446,12 @@ ogre = function(source, lockEditsToRoot) {
       path: rootpath,
       get: function(path, opts) {
         var data, kind;
-        if (arguments.length === 1 && type(path) === 'object') {
+        if (arguments.length === 1 && _.type(path) === 'object') {
           opts = path;
           path = '';
         }
-        data = getKeyPath(source, _fullpath(rootpath, path));
-        kind = type(data);
+        data = _.getKeyPath(source, _fullpath(rootpath, path));
+        kind = _.type(data);
         if ((kind === 'undefined' || kind === 'null') && ((opts != null ? opts.or : void 0) != null)) {
           return opts.or;
         } else if ((opts != null ? opts.clone : void 0) === false) {
@@ -2474,21 +2472,21 @@ ogre = function(source, lockEditsToRoot) {
           console.warn("You're trying to set data on a readonly cursor!");
           return this;
         }
-        if ((kind = type(path)) !== 'string') {
+        if ((kind = _.type(path)) !== 'string') {
           if (__indexOf.call(SETTABLE_VALUES, kind) >= 0) {
             silent = replace;
             replace = data;
             data = path;
             path = '';
           } else {
-            console.warn("The first parameter to .set() is an invalid type:", kind);
+            console.warn("The first parameter to .set() is an invalid _.type:", kind);
             return this;
           }
         }
         fullpath = _fullpath(rootpath, path);
         if (_lastChangePath != null) {
-          if (startsWith(path, _lastChangePath)) {
-            warnOnce("You're making changes in the same path (" + path + ") within an onChange handler. This can lead to infinite loops, be careful.");
+          if (_.startsWith(path, _lastChangePath)) {
+            _.warnOnce("You're making changes in the same path (" + path + ") within an onChange handler. This can lead to infinite loops, be careful.");
           }
         }
         _changeGraph(fullpath, data, replace, silent);
@@ -2509,7 +2507,7 @@ ogre = function(source, lockEditsToRoot) {
         fn || (fn = function(x) {
           return x;
         });
-        switch (type(result)) {
+        switch (_.type(result)) {
           case 'array':
             _results = [];
             for (idx = _i = 0, _len = result.length; _i < _len; idx = ++_i) {
@@ -2542,7 +2540,7 @@ ogre = function(source, lockEditsToRoot) {
           return false;
         }
         fullpath = _fullpath(rootpath, path);
-        return startsWith(_lastChangePath, fullpath);
+        return _.startsWith(_lastChangePath, fullpath);
       },
       exists: function(path) {
         var unlikelyValue;
@@ -2559,7 +2557,7 @@ ogre = function(source, lockEditsToRoot) {
         if (path == null) {
           path = '';
         }
-        kind = type(this.get(path));
+        kind = _.type(this.get(path));
         return kind === 'null' || kind === 'undefined';
       },
       isNotEmpty: function(path) {
@@ -2572,13 +2570,13 @@ ogre = function(source, lockEditsToRoot) {
         if (path == null) {
           path = '';
         }
-        return type(this.get(path)) === 'null';
+        return _.type(this.get(path)) === 'null';
       },
       isMissing: function(path) {
         if (path == null) {
           path = '';
         }
-        return type(this.get(path)) === 'undefined';
+        return _.type(this.get(path)) === 'undefined';
       },
       cursor: function(path, readonly) {
         var fullpath;
@@ -2653,7 +2651,7 @@ ogre = function(source, lockEditsToRoot) {
         return this;
       },
       stopListening: function(clearAll) {
-        var callback, i, idx, _i, _j, _len, _len1, _ref;
+        var callback, i, _i;
         if (clearAll == null) {
           clearAll = false;
         }
@@ -2663,42 +2661,24 @@ ogre = function(source, lockEditsToRoot) {
           }
           _callbacks.length = 0;
         } else {
-          idx = [];
-          for (i = _i = 0, _len = _callbacks.length; _i < _len; i = ++_i) {
+          for (i = _i = _callbacks.length - 1; _i >= 0; i = _i += -1) {
             callback = _callbacks[i];
             if (callback.cursor === this) {
-              idx.push(i);
+              _callbacks.splice(i, 1);
             }
-          }
-          if ("production" === 'development') {
-            console.log(':cursor: stop listening for changes', rootpath || '<root>');
-          }
-          _ref = idx.sort().reverse();
-          for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
-            i = _ref[_j];
-            _callbacks.splice(i, 1);
           }
         }
         return this;
       },
       stopListeningAt: function(path) {
-        var callback, i, idx, _i, _j, _len, _len1, _ref;
+        var callback, i, _i;
         if ((path != null) && !_.isEmpty(path)) {
           _fullpath(rootpath, path);
-          idx = [];
-          for (i = _i = 0, _len = _callbacks.length; _i < _len; i = ++_i) {
+          for (i = _i = _callbacks.length - 1; _i >= 0; i = _i += -1) {
             callback = _callbacks[i];
-            if (startsWith(path, callback.basepath)) {
-              idx.push(i);
+            if (_.startsWith(path, callback.basepath)) {
+              _callbacks.splice(i, 1);
             }
-          }
-          if ("production" === 'development') {
-            console.log(':cursor: stop listening for changes at', fullpath);
-          }
-          _ref = idx.sort().reverse();
-          for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
-            i = _ref[_j];
-            _callbacks.splice(i, 1);
           }
         } else {
           if ("production" === 'development') {
@@ -2809,11 +2789,11 @@ module.exports = _ = {
     parts = _.getKeyParts(keypath);
     key = parts.pop();
     container = parts.length ? _.getKeyPath(source, parts.join('.'), true) : source;
-    if (_.isEqual(container[key], data)) {
-      return false;
-    }
     current = container[key];
     if (replace === true || !_.isPlainObject(data)) {
+      if (_.isEqual(container[key], data)) {
+        return false;
+      }
       container[key] = data;
     } else {
       merged = _.extend(_.clone(current || {}), data);

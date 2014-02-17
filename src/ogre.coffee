@@ -12,22 +12,10 @@ the callback.
 
 ###
 
-# Sort of a hack so it works in node and the browser
-# if require? and not @_? then `global._= require('underscore')`
-# _= require 'underscore'
 _= require './tools'
-
 DEBUG= if process.env.NODE_ENV is 'development' then yes else no
 SETTABLE_VALUES= 'object array null undefined'.split ' '
 changeEvent= require './change-event'
-{
-  startsWith
-  warnOnce
-  getKeyParts
-  getKeyPath
-  setKeyPath
-  type
-}= _
 
 ogre= (source, lockEditsToRoot=no)->
   _callbacks= []
@@ -40,16 +28,16 @@ ogre= (source, lockEditsToRoot=no)->
   # Should it sort and call events based on path ('page' before 'page.current')?
   # If so, it should probably do the sorting at onChange() time, not here.
   _triggerCallbacks= (e)->
-    cb.exec e for cb in _callbacks when startsWith e.path, cb?.basepath 
+    cb.exec e for cb in _callbacks when _.startsWith e.path, cb?.basepath 
     e
 
   _changeGraph= (fullpath, data, replace, silent)->
-    if e= setKeyPath source, fullpath, data, replace
+    if e= _.setKeyPath source, fullpath, data, replace
       return if silent
       _lastChangePath= e.path
       _triggerCallbacks e
       _lastChangePath= null
-      warnOnce.clear()
+      _.warnOnce.clear()
 
   # The main cursor/view functionality is built here so that it can enclose the
   # source data (no need to have a reference to all that in sub-objects).
@@ -58,12 +46,12 @@ ogre= (source, lockEditsToRoot=no)->
     path: rootpath # can't change this, only for reference
 
     get: (path, opts)->
-      if arguments.length is 1 and type(path) is 'object'
+      if arguments.length is 1 and _.type(path) is 'object'
         opts= path
         path= ''
 
-      data= getKeyPath source, _fullpath(rootpath, path)
-      kind= type(data)
+      data= _.getKeyPath source, _fullpath(rootpath, path)
+      kind= _.type(data)
       
       if (kind is 'undefined' or kind is 'null') and opts?.or?
         opts.or
@@ -91,14 +79,14 @@ ogre= (source, lockEditsToRoot=no)->
         console.warn "You're trying to set data on a readonly cursor!"
         return this 
 
-      if (kind= type path) isnt 'string'
+      if (kind= _.type path) isnt 'string'
         if kind in SETTABLE_VALUES
           silent= replace
           replace= data
           data= path
           path= ''
         else
-          console.warn "The first parameter to .set() is an invalid type:", kind
+          console.warn "The first parameter to .set() is an invalid _.type:", kind
           return this
 
       fullpath= _fullpath(rootpath, path)
@@ -107,8 +95,8 @@ ogre= (source, lockEditsToRoot=no)->
       # or apply them immediately? If it's a change to the same sub-tree that's
       # being notified should it do it silently, or disallow it completely?
       if _lastChangePath? # NEED TO TEST THIS!
-        if startsWith path, _lastChangePath
-          warnOnce "You're making changes in the same path (#{ path }) within an onChange handler. 
+        if _.startsWith path, _lastChangePath
+          _.warnOnce "You're making changes in the same path (#{ path }) within an onChange handler. 
                     This can lead to infinite loops, be careful."
 
       _changeGraph fullpath, data, replace, silent
@@ -128,7 +116,7 @@ ogre= (source, lockEditsToRoot=no)->
         else
           @get()
       fn or= (x)-> x
-      switch type result
+      switch _.type result
         when 'array'
           fn value, idx, result for value,idx in result
         when 'object'
@@ -143,22 +131,22 @@ ogre= (source, lockEditsToRoot=no)->
       return no unless _lastChangePath?
       
       fullpath= _fullpath rootpath, path
-      startsWith _lastChangePath, fullpath
+      _.startsWith _lastChangePath, fullpath
 
     exists: (path='')->
       unlikelyValue= '*^%^*(*&!'
       @get(path, or:unlikelyValue) isnt unlikelyValue
 
     isEmpty: (path='')-> # was: _.isEmpty @get(path)
-      kind= type @get path
+      kind= _.type @get path
       kind is 'null' or kind is 'undefined'
 
     isNotEmpty: (path='')-> # was: _.isEmpty @get(path)
       not @isEmpty path
       
-    isNull: (path='')-> type( @get path ) is 'null'
+    isNull: (path='')-> _.type( @get path ) is 'null'
 
-    isMissing: (path='')-> type( @get path ) is 'undefined'
+    isMissing: (path='')-> _.type( @get path ) is 'undefined'
 
     cursor: (path, readonly)->
       fullpath= _fullpath(rootpath, path)
@@ -212,11 +200,17 @@ ogre= (source, lockEditsToRoot=no)->
       if clearAll is yes and rootpath is ''
         console.log ':cursor: clearing all callbacks', rootpath or '<root>' if process.env.NODE_ENV is 'development'
         _callbacks.length= 0
+      
       else
-        idx= []
-        idx.push i for callback,i in _callbacks when callback.cursor is this
-        console.log ':cursor: stop listening for changes', rootpath or '<root>' if process.env.NODE_ENV is 'development'
-        _callbacks.splice i, 1 for i in idx.sort().reverse()
+        for callback,i in _callbacks by -1 when callback.cursor is this
+          _callbacks.splice i, 1
+          # console.log ':cursor: stop listening for changes', rootpath or '<root>' if process.env.NODE_ENV is 'development'
+        
+        # idx= []
+        # idx.push i for callback,i in _callbacks when callback.cursor is this
+        # console.log ':cursor: stop listening for changes', rootpath or '<root>' if process.env.NODE_ENV is 'development'
+        # _callbacks.splice i, 1 for i in idx.sort().reverse()
+
       this
 
     # Removes all listeners for a given path, regardless which cursor is using it.
@@ -225,10 +219,12 @@ ogre= (source, lockEditsToRoot=no)->
     stopListeningAt: (path)->
       if path? and not _.isEmpty path
         _fullpath rootpath, path
-        idx= []
-        idx.push i for callback,i in _callbacks when startsWith path, callback.basepath 
-        console.log ':cursor: stop listening for changes at', fullpath if process.env.NODE_ENV is 'development'
-        _callbacks.splice i, 1 for i in idx.sort().reverse()
+        for callback,i in _callbacks by -1 when _.startsWith path, callback.basepath 
+          _callbacks.splice i, 1
+        # idx= []
+        # idx.push i for callback,i in _callbacks when _.startsWith path, callback.basepath 
+        # console.log ':cursor: stop listening for changes at', fullpath if process.env.NODE_ENV is 'development'
+        # _callbacks.splice i, 1 for i in idx.sort().reverse()
       else
         console.warn "You must specify a path to stop listening to." if process.env.NODE_ENV is 'development'
       this
@@ -240,101 +236,4 @@ ogre= (source, lockEditsToRoot=no)->
   # Return the public interface, which is a cursor to the root path
   cursor('', lockEditsToRoot)
 
-# # Helpers
-
-# warnOnce= do ->
-#   count= 0
-  
-#   api= (msg)->
-#     if count is 0
-#       console.warn msg
-#       # err= new Error()
-#       # console.dir err.stack
-#     count += 1
-  
-#   api.clear= ->
-#     count= 0
-  
-#   api
-
-
-# getKeyParts= (keypath)->
-#   _.compact keypath.split '.'
-
-
-# getKeyPath= (source, keypath='', create=no)->
-#   parts= getKeyParts keypath
-#   obj= source
-  
-#   while obj? and parts.length
-#     key= parts.shift()
-#     if not obj[ key ] 
-#       obj[ key ]= {} if create is yes
-#     obj= obj[ key ]
-  
-#   obj
-
-
-# setKeyPath= (source, keypath='', data, replace)->
-#   parts= getKeyParts keypath
-#   key= parts.pop()
-#   container= if parts.length 
-#       getKeyPath source, parts.join('.'), yes
-#     else
-#       source
-  
-#   return no if _.isEqual container[key], data
-
-#   current= container[key]
-  
-#   if replace is yes or not isPlainObject data 
-#     # console.log "$ replace key:", key, 'keypath:', keypath, 'type:', type(data), 'replace (forced):', replace
-#     container[key]= data
-  
-#   else
-#     # console.log "$ merge key:", key, 'keypath:', keypath, 'type:', type(data), 'existing:', container[key], 'new:', data, 'replace (forced):', replace
-#     merged= _.extend _.clone(current or {}), data #data=
-#     return no if _.isEqual current, merged
-#     container[key]= merged
-#     # Comment this if you want to only send the changes themselves in the event...
-#     data= merged
-
-#   changeEvent keypath, data, current
-
-
-# type= do ->
-#   _toString= Object::toString
-#   elemParser= /\[object HTML(.*)\]/
-#   classToType= {}
-#   for name in "Array Boolean Date Function NodeList Null Number RegExp String Undefined ".split(" ")
-#     classToType["[object " + name + "]"] = name.toLowerCase()
-  
-#   (obj) ->
-#     strType = _toString.call obj
-#     if found= classToType[ strType ]
-#       found
-#     else if found= strType.match elemParser
-#       found[1].toLowerCase()
-#     else
-#       "object"
-
-# # Could do more, but it's probably good enough for now.
-# isPlainObject= (obj)->
-#   type(obj) is 'object'
-
-# startsWith= (str, starts) ->
-#   return yes if starts is ''
-#   return no if str is null or starts is null
-#   str= String str
-#   starts= String starts
-#   str.length >= starts.length and str.slice(0, starts.length) is starts
-
-
-
-
 module.exports= ogre
-
-# if module?
-#   module.exports= ogre
-# else
-#   @ogre= ogre

@@ -68,13 +68,11 @@ module.exports= _=
         _.getKeyPath source, parts.join('.'), yes
       else
         source
-    
-    return no if _.isEqual container[key], data
-
     current= container[key]
     
     if replace is yes or not _.isPlainObject data 
       # console.log "$ replace key:", key, 'keypath:', keypath, 'type:', type(data), 'replace (forced):', replace
+      return no if _.isEqual container[key], data
       container[key]= data
     
     else
@@ -82,7 +80,6 @@ module.exports= _=
       merged= _.extend _.clone(current or {}), data #data=
       return no if _.isEqual current, merged
       container[key]= merged
-      # Comment this if you want to only send the changes themselves in the event...
       data= merged
 
     changeEvent keypath, data, current
