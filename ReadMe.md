@@ -14,9 +14,9 @@ Or the browser:
 bower install --save ogre-js
 ```
 
+
 # Todo
 
-- Remove dependency on Underscore
 - Flesh out ReadMe
 - Expand the docs
 - Build some examples

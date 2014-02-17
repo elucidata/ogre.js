@@ -34,9 +34,10 @@ counts=
 
 assert= (condition, msg)->
   counts.assertions += 1
-  expect(condition).to.be.true
+  chai.assert condition, msg
+  # expect(condition).to.be.true
   # unless condition
-  #   throw new Error "Assertion Error: #{ msg}"
+  #   throw new Error "Assertion Error: #{ msg }"
 
 
 # module.exports.runTests= ->

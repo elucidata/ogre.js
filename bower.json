@@ -1,6 +1,6 @@
 {
   "name": "ogre",
-  "main": "ogre.js",
+  "main": "dist/ogre.min.js",
   "version": "0.1.1",
   "authors": [
     "Matt McCray <matt@elucidata.net>"
@@ -16,13 +16,11 @@
     "change",
     "callbacks"
   ],
-  "dependencies": {
-    "underscore": "*"
-  },
   "ignore": [
     "**/.*",
     "node_modules",
     "bower_components",
+    "experiments",
     "test",
     "tests"
   ]

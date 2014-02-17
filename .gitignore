@@ -24,3 +24,6 @@ tags
 
 # NPM packages folder.
 node_modules/
+
+# Misc
+experiments/

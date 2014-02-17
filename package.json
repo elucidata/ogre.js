@@ -2,37 +2,44 @@
   "name": "ogre-js",
   "version": "0.1.1",
   "description": "Object graph manager, built with ReactJS in mind.",
-  "main": "ogre.js",
-  "scripts": {
-    "preblish": "npm run dist",
-    "test": "npm run build && npm run build-test && mocha",
-    "build": "coffee -o ./ -c src/ogre.coffee",
-    "build-test": "coffee -b -c -j test/all-tests.js test/src/test-helpers.coffee test/src/test-api.coffee test/src/test-flows.coffee test/src/misc-test.coffee",
-    "min": "uglifyjs ogre.js -o ogre.min.js -c -m --preamble \"/* ogre.js - MIT Licensed - http://github.com/elucidata/ogre.js */\"",
-    "dist": "npm run test && npm run min",
-    "inc-major": "mversion major",
-    "inc-minor": "mversion minor",
-    "inc-patch": "mversion patch",
-    "version": "mversion"
-  },
   "author": "Matt McCray <matt@elucidata.net>",
   "license": "MIT",
+  "main": "index.js",
+  "homepage": "https://github.com/elucidata/ogre.js",
   "bugs": {
     "url": "https://github.com/elucidata/ogre.js/issues"
   },
-  "homepage": "https://github.com/elucidata/ogre.js",
   "repository": {
     "type": "git",
     "url": "git://github.com/elucidata/ogre.js.git"
   },
   "dependencies": {
-    "underscore": "~1.6.0"
+    "coffee-script": "~1.7.1",
+    "lodash-node": "~2.4.1"
   },
   "devDependencies": {
     "mocha": "~1.17.1",
-    "coffee-script": "~1.7.1",
     "uglify-js": "~2.4.8",
     "chai": "~1.9.0",
-    "mversion": "~0.3.1"
+    "mversion": "~0.3.1",
+    "browserify": "~3.30.1",
+    "coffeeify": "~0.6.0",
+    "gulp": "~3.5.2",
+    "uglifyify": "~1.2.2",
+    "envify": "~1.1.0",
+    "browserify-shim": "~3.2.2"
+  },
+  "scripts": {
+    "preblish": "npm run dist",
+    "test": "npm run build && npm run build-test && clear && mocha",
+    "build-all": "npm run build && npm run build-min && npm run build-test",
+    "build": "NODE_ENV=production browserify -s ogre -t coffeeify --extension='.coffee' -t envify src/ogre.coffee > dist/ogre.js",
+    "build-min": "NODE_ENV=production browserify -s ogre -t coffeeify --extension='.coffee' -t envify -t uglifyify src/ogre.coffee | uglifyjs -c  -m > dist/ogre.min.js",
+    "build-test": "coffee -b -c -j test/all-tests.js test/src/test-helpers.coffee test/src/test-api.coffee test/src/test-flows.coffee test/src/misc-test.coffee",
+    "dist": "npm run test && npm run build-min",
+    "inc-major": "mversion major",
+    "inc-minor": "mversion minor",
+    "inc-patch": "mversion patch",
+    "version": "mversion"
   }
 }

@@ -1,5 +1,8 @@
+unless _?.isEqual?
+  _= 
+    isEqual: require('lodash-node/compat/objects/isEqual')
 
-test_graph=
+test_graph= ->
   page:
     current: 'home'
     params: null
@@ -11,8 +14,10 @@ test_graph=
 
 describe 'Dataset', ->
   beforeEach ->
-    @graph= _.clone test_graph
+    @graph= test_graph()
+    # window.graph= @graph
     @data= ogre @graph
+    # window.ogdata= @data
 
   it 'should exist', ->
     expect( 

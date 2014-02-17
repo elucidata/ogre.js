@@ -1,8 +1,8 @@
-### ogre.js - MIT Licensed - http://github.com/elucidata/ogre.js ###
+### 
 
-###
+ogre.js - MIT Licensed - http://github.com/elucidata/ogre.js 
 
-Dependencies: Underscore/Lo-Dash
+An object graph manager built with ReactJS in mind.
 
 All cursors are virtual, data operations happen on the root source object.
 
@@ -10,36 +10,24 @@ Meaning, you can create cursors for unpopulated paths and set onChange
 handlers for them, then when/if data is ever set for that path you'll get 
 the callback.
 
-Notes/Ideas:
-
-- Maybe the onChange callback Event should have a stopPropagation() method
-  that would... What? Stop application of the object to the graph? Or maybe
-  there would also be a preventDefault() method that would do that and 
-  stopPropagation() would just stop calling any further callbacks.
-- Add a capture phase to the event triggers...
-  - Any changes to e.value would be used in the merge/replace phase of
-    the process (and not trigger any further events).
-
-
-myHandler= (e)->
-  e.path #=> the key path of the change
-  e.value #=> the new merged value
-  e.oldValue #=> the previous value
-  e.preventDefault()? #=> prevents further event handler calls?
-  e.stopPropagation()? #=> prevents events from bubbling up the graph?
-  e.phase #=> 'capture' or 'bubble'
-
-data.onChange myHandler, true # last bool is capture flag
-data.onChange myHandler, false
-
 ###
 
 # Sort of a hack so it works in node and the browser
-if require? and not @_? then `global._= require('underscore')`
+# if require? and not @_? then `global._= require('underscore')`
+# _= require 'underscore'
+_= require './tools'
 
-DEBUG= no
-
+DEBUG= if process.env.NODE_ENV is 'development' then yes else no
 SETTABLE_VALUES= 'object array null undefined'.split ' '
+changeEvent= require './change-event'
+{
+  startsWith
+  warnOnce
+  getKeyParts
+  getKeyPath
+  setKeyPath
+  type
+}= _
 
 ogre= (source, lockEditsToRoot=no)->
   _callbacks= []
@@ -210,7 +198,7 @@ ogre= (source, lockEditsToRoot=no)->
 
     onChange: (callback, path)->
       ###* path is optional, defaults to path of cursor ###
-      console.log ':cursor: start listening for changes', rootpath or '<root>' if DEBUG
+      console.log ':cursor: start listening for changes', rootpath or '<root>' if process.env.NODE_ENV is 'development'
       fullpath= if path?
           _fullpath rootpath, path
         else
@@ -222,12 +210,12 @@ ogre= (source, lockEditsToRoot=no)->
     # Will remove all event handlers setup by this cursor object.
     stopListening: (clearAll=no)->
       if clearAll is yes and rootpath is ''
-        console.log ':cursor: clearing all callbacks', rootpath or '<root>' if DEBUG
+        console.log ':cursor: clearing all callbacks', rootpath or '<root>' if process.env.NODE_ENV is 'development'
         _callbacks.length= 0
       else
         idx= []
         idx.push i for callback,i in _callbacks when callback.cursor is this
-        console.log ':cursor: stop listening for changes', rootpath or '<root>' if DEBUG and idx.length > 0
+        console.log ':cursor: stop listening for changes', rootpath or '<root>' if process.env.NODE_ENV is 'development'
         _callbacks.splice i, 1 for i in idx.sort().reverse()
       this
 
@@ -239,10 +227,10 @@ ogre= (source, lockEditsToRoot=no)->
         _fullpath rootpath, path
         idx= []
         idx.push i for callback,i in _callbacks when startsWith path, callback.basepath 
-        console.log ':cursor: stop listening for changes at', fullpath if DEBUG and idx.length > 0
+        console.log ':cursor: stop listening for changes at', fullpath if process.env.NODE_ENV is 'development'
         _callbacks.splice i, 1 for i in idx.sort().reverse()
       else
-        console.warn "You must specify a path to stop listening to." if DEBUG
+        console.warn "You must specify a path to stop listening to." if process.env.NODE_ENV is 'development'
       this
     
     dispose: ->
@@ -252,100 +240,101 @@ ogre= (source, lockEditsToRoot=no)->
   # Return the public interface, which is a cursor to the root path
   cursor('', lockEditsToRoot)
 
-# Helpers
+# # Helpers
 
-changeEvent= (path, value, oldValue) ->
-  {path, value, oldValue}
-
-warnOnce= do ->
-  count= 0
+# warnOnce= do ->
+#   count= 0
   
-  api= (msg)->
-    if count is 0
-      console.warn msg
-      # err= new Error()
-      # console.dir err.stack
-    count += 1
+#   api= (msg)->
+#     if count is 0
+#       console.warn msg
+#       # err= new Error()
+#       # console.dir err.stack
+#     count += 1
   
-  api.clear= ->
-    count= 0
+#   api.clear= ->
+#     count= 0
   
-  api
+#   api
 
 
-getKeyParts= (keypath)->
-  _.compact keypath.split '.'
+# getKeyParts= (keypath)->
+#   _.compact keypath.split '.'
 
 
-getKeyPath= (source, keypath='', create=no)->
-  parts= getKeyParts keypath
-  obj= source
+# getKeyPath= (source, keypath='', create=no)->
+#   parts= getKeyParts keypath
+#   obj= source
   
-  while obj? and parts.length
-    key= parts.shift()
-    if not obj[ key ] 
-      obj[ key ]= {} if create is yes
-    obj= obj[ key ]
+#   while obj? and parts.length
+#     key= parts.shift()
+#     if not obj[ key ] 
+#       obj[ key ]= {} if create is yes
+#     obj= obj[ key ]
   
-  obj
+#   obj
 
 
-setKeyPath= (source, keypath='', data, replace)->
-  parts= getKeyParts keypath
-  key= parts.pop()
-  container= if parts.length 
-      getKeyPath source, parts.join('.'), yes
-    else
-      source
+# setKeyPath= (source, keypath='', data, replace)->
+#   parts= getKeyParts keypath
+#   key= parts.pop()
+#   container= if parts.length 
+#       getKeyPath source, parts.join('.'), yes
+#     else
+#       source
   
-  return no if _.isEqual container[key], data
+#   return no if _.isEqual container[key], data
 
-  current= container[key]
+#   current= container[key]
   
-  if replace is yes or not isPlainObject data 
-    # console.log "$ replace key:", key, 'keypath:', keypath, 'type:', type(data), 'replace (forced):', replace
-    container[key]= data
+#   if replace is yes or not isPlainObject data 
+#     # console.log "$ replace key:", key, 'keypath:', keypath, 'type:', type(data), 'replace (forced):', replace
+#     container[key]= data
   
-  else
-    # console.log "$ merge key:", key, 'keypath:', keypath, 'type:', type(data), 'existing:', container[key], 'new:', data, 'replace (forced):', replace
-    merged= _.extend _.clone(current or {}), data #data=
-    return no if _.isEqual current, merged
-    container[key]= merged
-    # Comment this if you want to only send the changes themselves in the event...
-    data= merged
+#   else
+#     # console.log "$ merge key:", key, 'keypath:', keypath, 'type:', type(data), 'existing:', container[key], 'new:', data, 'replace (forced):', replace
+#     merged= _.extend _.clone(current or {}), data #data=
+#     return no if _.isEqual current, merged
+#     container[key]= merged
+#     # Comment this if you want to only send the changes themselves in the event...
+#     data= merged
 
-  changeEvent keypath, data, current
+#   changeEvent keypath, data, current
 
 
-type= do ->
-  _toString= Object::toString
-  elemParser= /\[object HTML(.*)\]/
-  classToType= {}
-  for name in "Array Boolean Date Function NodeList Null Number RegExp String Undefined ".split(" ")
-    classToType["[object " + name + "]"] = name.toLowerCase()
+# type= do ->
+#   _toString= Object::toString
+#   elemParser= /\[object HTML(.*)\]/
+#   classToType= {}
+#   for name in "Array Boolean Date Function NodeList Null Number RegExp String Undefined ".split(" ")
+#     classToType["[object " + name + "]"] = name.toLowerCase()
   
-  (obj) ->
-    strType = _toString.call obj
-    if found= classToType[ strType ]
-      found
-    else if found= strType.match elemParser
-      found[1].toLowerCase()
-    else
-      "object"
+#   (obj) ->
+#     strType = _toString.call obj
+#     if found= classToType[ strType ]
+#       found
+#     else if found= strType.match elemParser
+#       found[1].toLowerCase()
+#     else
+#       "object"
 
-# Could do more, but it's probably good enough for now.
-isPlainObject= (obj)->
-  type(obj) is 'object'
+# # Could do more, but it's probably good enough for now.
+# isPlainObject= (obj)->
+#   type(obj) is 'object'
 
-startsWith= (str, starts) ->
-  return yes if starts is ''
-  return no if str is null or starts is null
-  str= String str
-  starts= String starts
-  str.length >= starts.length and str.slice(0, starts.length) is starts
+# startsWith= (str, starts) ->
+#   return yes if starts is ''
+#   return no if str is null or starts is null
+#   str= String str
+#   starts= String starts
+#   str.length >= starts.length and str.slice(0, starts.length) is starts
 
 
-if module?
-  module.exports= ogre
-else
-  @ogre= ogre
+
+
+module.exports= ogre
+
+# if module?
+#   module.exports= ogre
+# else
+#   @ogre= ogre

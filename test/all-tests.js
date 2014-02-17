@@ -3,10 +3,7 @@ var assert, chai, counts, data, expect, ogre, page, prof, state, test_graph, veh
 
 if (typeof require !== "undefined" && require !== null) {
   if (typeof ogre === "undefined" || ogre === null) {
-    ogre = require('../ogre');
-  }
-  if (typeof _ === "undefined" || _ === null) {
-    _ = require('underscore');
+    ogre = require('../dist/ogre');
   }
   if (typeof chai === "undefined" || chai === null) {
     chai = require('chai');
@@ -15,9 +12,6 @@ if (typeof require !== "undefined" && require !== null) {
 } else {
   if (ogre == null) {
     throw "Dependency not met: ogre";
-  }
-  if (_ == null) {
-    throw "Dependency not met: _";
   }
   if (chai == null) {
     throw "Dependency not met: chai";
@@ -97,23 +91,31 @@ describe('Ogre Dataset API', function() {
 
 describe('Cursor API', function() {});
 
-test_graph = {
-  page: {
-    current: 'home',
-    params: null
-  },
-  profile: {
-    name: null,
-    email: null
-  },
-  prefs: {
-    firstRun: false
-  }
+if ((typeof _ !== "undefined" && _ !== null ? _.isEqual : void 0) == null) {
+  _ = {
+    isEqual: require('lodash-node/compat/objects/isEqual')
+  };
+}
+
+test_graph = function() {
+  return {
+    page: {
+      current: 'home',
+      params: null
+    },
+    profile: {
+      name: null,
+      email: null
+    },
+    prefs: {
+      firstRun: false
+    }
+  };
 };
 
 describe('Dataset', function() {
   beforeEach(function() {
-    this.graph = _.clone(test_graph);
+    this.graph = test_graph();
     return this.data = ogre(this.graph);
   });
   it('should exist', function() {
@@ -207,7 +209,7 @@ counts = {
 
 assert = function(condition, msg) {
   counts.assertions += 1;
-  return expect(condition).to.be["true"];
+  return chai.assert(condition, msg);
 };
 
 describe('Ogre (old)', function() {
