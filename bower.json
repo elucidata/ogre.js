@@ -1,7 +1,7 @@
 {
   "name": "ogre",
   "main": "dist/ogre.min.js",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "authors": [
     "Matt McCray <matt@elucidata.net>"
   ],

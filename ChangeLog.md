@@ -1,4 +1,6 @@
 # HEAD
+
+# v0.1.3
 - Fixed lockEditsToRoot flag.
 
 # v0.1.2
