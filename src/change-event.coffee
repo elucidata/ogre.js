@@ -1,3 +1,4 @@
 
-module.exports= changeEvent= (path, value, oldValue) ->
+module.exports=
+changeEvent= (path, value, oldValue) ->
   {path, value, oldValue}

@@ -42,6 +42,7 @@ ogre= (source, lockEditsToRoot=no)->
   # The main cursor/view functionality is built here so that it can enclose the
   # source data (no need to have a reference to all that in sub-objects).
   cursor= (rootpath, readonly=no)->
+    readonly=no if lockEditsToRoot and rootpath is ''
 
     path: rootpath # can't change this, only for reference
 

@@ -1,4 +1,5 @@
 # HEAD
+- Fixed lockEditsToRoot flag.
 
 # v0.1.2
 - Reorganized files, moved dist files under dist/ folder.

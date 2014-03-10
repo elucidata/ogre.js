@@ -114,52 +114,166 @@ test_graph = function() {
 };
 
 describe('Dataset', function() {
+  var dataset, page_cursor, source_graph, _ref;
+  _ref = [], page_cursor = _ref[0], source_graph = _ref[1], dataset = _ref[2];
   beforeEach(function() {
-    this.graph = test_graph();
-    return this.data = ogre(this.graph);
+    source_graph = test_graph();
+    return dataset = ogre(source_graph);
   });
   it('should exist', function() {
-    return expect(this.data).to.exist;
+    return expect(dataset).to.exist;
   });
   it('should return cloned data by default', function() {
-    return expect(this.data.get()).to.not.be.equal(this.graph);
+    return expect(dataset.get()).to.not.be.equal(source_graph);
   });
   it('should optionally return source data', function() {
-    return expect(this.data.get({
+    return expect(dataset.get({
       clone: false
-    })).to.equal(this.graph);
+    })).to.equal(source_graph);
   });
   it('should allow graph access via path', function() {
-    return expect(this.data.get('page.current')).to.equal('home');
+    return expect(dataset.get('page.current')).to.equal('home');
   });
   it('should return default value if path doesn\'t exist', function() {
-    expect(this.data.get('made.up.key', {
+    expect(dataset.get('made.up.key', {
       or: 'DEFAULT'
     })).to.equal('DEFAULT');
 
     /* Should return default value for null values in graph as well */
-    return expect(this.data.get('page.params', {
+    return expect(dataset.get('page.params', {
       or: 'DEFAULT'
     })).to.equal('DEFAULT');
   });
   it('should not return default value if path does exist', function() {
-    return expect(this.data.get('page.current', {
+    return expect(dataset.get('page.current', {
       or: 'DEFAULT'
     })).to.not.equal('DEFAULT');
   });
   it('should allow setting values at arbitrary paths', function() {
-    expect(this.data.get('tmp.new.key')).to.not.exist;
-    this.data.set('tmp.new.key', 'VALUE');
-    return expect(this.data.get('tmp.new.key')).to.equal('VALUE');
+    expect(dataset.get('tmp.new.key')).to.not.exist;
+    dataset.set('tmp.new.key', 'VALUE');
+    return expect(dataset.get('tmp.new.key')).to.equal('VALUE');
   });
-  return it('should not allow setting non-collection values directly to dataset', function() {
-    expect(this.data.get({
+  it('should not allow setting non-collection values directly to dataset', function() {
+    expect(dataset.get({
       clone: false
-    })).to.equal(this.graph);
-    this.data.set('VALUE');
-    return expect(this.data.get({
+    })).to.equal(source_graph);
+    dataset.set('VALUE');
+    return expect(dataset.get({
       clone: false
-    })).to.equal(this.graph);
+    })).to.equal(source_graph);
+  });
+  it('should trigger change event when setting arrays with keys', function() {
+    var eventFired;
+    eventFired = 0;
+    dataset.onChange(function() {
+      return eventFired += 1;
+    });
+    dataset.set('my.path', []);
+    expect(eventFired).to.equal(1);
+    dataset.set('my.path', []);
+    expect(eventFired).to.equal(1);
+    dataset.set('my.path', null);
+    expect(eventFired).to.equal(2);
+    dataset.set('my.path', ['test']);
+    expect(eventFired).to.equal(3);
+    dataset.set('my.path', []);
+    return expect(eventFired).to.equal(4);
+  });
+  it('should trigger change event when setting arrays without keys', function() {
+    var eventFired;
+    eventFired = 0;
+    dataset.onChange(function() {
+      return eventFired += 1;
+    });
+    dataset.set([]);
+    expect(eventFired).to.equal(1);
+    dataset.set([]);
+    expect(eventFired).to.equal(1);
+    dataset.set(null);
+    expect(eventFired).to.equal(2);
+    dataset.set(['test']);
+    expect(eventFired).to.equal(3);
+    dataset.set([]);
+    return expect(eventFired).to.equal(4);
+  });
+  describe("Edits locked to root (no cursor updates)", function() {
+    var change_count, lockeddatasetset, profile_change_count, profile_cursor, _ref1;
+    _ref1 = [], lockeddatasetset = _ref1[0], profile_cursor = _ref1[1], change_count = _ref1[2], profile_change_count = _ref1[3];
+    beforeEach(function() {
+      lockeddatasetset = ogre(source_graph, true);
+      profile_cursor = lockeddatasetset.cursor('profile');
+      change_count = 0;
+      profile_change_count = 0;
+      lockeddatasetset.onChange(function() {
+        return change_count += 1;
+      });
+      return profile_cursor.onChange(function() {
+        return profile_change_count += 1;
+      });
+    });
+    it('should allow edits from dataset root.', function() {
+      lockeddatasetset.set('page', null);
+      lockeddatasetset.set('other', 'stuff');
+      return expect(change_count).to.equal(2);
+    });
+    it('should not allow edits from cursors', function() {
+      profile_cursor.set('misc', 'data');
+      profile_cursor.set(null);
+      expect(change_count).to.equal(0);
+      return expect(profile_change_count).to.equal(0);
+    });
+    return it('should trigger onChange handlers for cursor', function() {
+      lockeddatasetset.set('profile.misc', 'from root');
+      expect(change_count).to.equal(1);
+      expect(profile_change_count).to.equal(1);
+
+      /* It should allow getting scoped data from cursor */
+      expect(profile_cursor.get('misc')).to.equal('from root');
+      return expect(lockeddatasetset.get('profile.misc')).to.equal('from root');
+    });
+  });
+  return describe('ogre.cursor', function() {
+    beforeEach(function() {
+      return page_cursor = dataset.cursor('page');
+    });
+    afterEach(function() {
+      return page_cursor.dispose();
+    });
+    it('should trigger change event when setting arrays with keys', function() {
+      var eventFired;
+      eventFired = 0;
+      page_cursor.onChange(function() {
+        return eventFired += 1;
+      });
+      page_cursor.set('sub.key', []);
+      expect(eventFired).to.equal(1);
+      page_cursor.set('sub.key', []);
+      expect(eventFired).to.equal(1);
+      page_cursor.set('sub.key', null);
+      expect(eventFired).to.equal(2);
+      page_cursor.set('sub.key', ['test']);
+      expect(eventFired).to.equal(3);
+      page_cursor.set('sub.key', []);
+      return expect(eventFired).to.equal(4);
+    });
+    return it('should trigger change event when setting arrays without keys', function() {
+      var eventFired;
+      eventFired = 0;
+      page_cursor.onChange(function() {
+        return eventFired += 1;
+      });
+      page_cursor.set([]);
+      expect(eventFired).to.equal(1);
+      page_cursor.set([]);
+      expect(eventFired).to.equal(1);
+      page_cursor.set(null);
+      expect(eventFired).to.equal(2);
+      page_cursor.set(['test']);
+      expect(eventFired).to.equal(3);
+      page_cursor.set([]);
+      return expect(eventFired).to.equal(4);
+    });
   });
 });
 

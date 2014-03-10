@@ -2442,6 +2442,9 @@ ogre = function(source, lockEditsToRoot) {
     if (readonly == null) {
       readonly = false;
     }
+    if (lockEditsToRoot && rootpath === '') {
+      readonly = false;
+    }
     return {
       path: rootpath,
       get: function(path, opts) {
