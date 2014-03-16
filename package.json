@@ -1,6 +1,6 @@
 {
   "name": "ogre-js",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Object graph manager, built with ReactJS in mind.",
   "author": "Matt McCray <matt@elucidata.net>",
   "license": "MIT",
