@@ -30,11 +30,12 @@
     "browserify-shim": "~3.2.2"
   },
   "scripts": {
-    "preblish": "npm run dist",
+    "prepublish": "npm run build-lib",
     "test": "npm run build && npm run build-test && clear && mocha",
-    "build-all": "npm run build && npm run build-min && npm run build-test",
+    "build-all": "npm run build && npm run build-min && npm run build-test && npm run build-lib",
     "build": "NODE_ENV=production browserify -s ogre -t coffeeify --extension='.coffee' -t envify src/ogre.coffee > dist/ogre.js",
     "build-min": "NODE_ENV=production browserify -s ogre -t coffeeify --extension='.coffee' -t envify -t uglifyify src/ogre.coffee | uglifyjs -c  -m > dist/ogre.min.js",
+    "build-lib": "coffee -c -o lib",
     "build-test": "coffee -b -c -j test/all-tests.js test/src/test-helpers.coffee test/src/test-api.coffee test/src/test-flows.coffee test/src/misc-test.coffee",
     "dist": "npm run test && npm run build-min",
     "inc-major": "mversion major",

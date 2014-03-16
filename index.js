@@ -1,3 +1,3 @@
 // require('coffee-script/register')
 // module.exports= require('./src/ogre')
-module.exports= require('./dist/ogre')
+module.exports= require('./lib/ogre')
