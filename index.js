@@ -1,2 +1,3 @@
-require('coffee-script/register')
-module.exports= require('./src/ogre')
+// require('coffee-script/register')
+// module.exports= require('./src/ogre')
+module.exports= require('./dist/ogre')
