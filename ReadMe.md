@@ -1,3 +1,7 @@
+# DEPRECATED
+
+See Ogre2: https://github.com/elucidata/ogre2
+
 # Ogre
 
 Ogre is a simple object graph manager, built with ReactJS in mind. You can create light-weight cursors that 'view' subtree paths of the main object graph. You can also listen for changes anywhere in the graph.
